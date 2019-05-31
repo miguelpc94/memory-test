@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import GameHeader from './GameHeader';
+import GameIntro from './GameIntro';
 import ButtonBoard from './ButtonBoard';
+import MessageDisplay from './MessageDisplay';
+import ShowLevel from './ShowLevel';
+import StateDependentButton from './StateDependentButton';
 
 
 /* The game could be in any of the states below:
@@ -15,6 +19,7 @@ import ButtonBoard from './ButtonBoard';
 const useGameState = () => {
     const [gameState, setGameState] = useState('start');
     const [activeNumber, setActiveNumber] = useState(0);
+    const [gameLevel, setGameLevel] = useState(0);
 
     const updateBackgroundColor = (gameState) => {
         let color;
@@ -48,6 +53,8 @@ const useGameState = () => {
     updateBackgroundColor(gameState);
 
     return {
+        gameLevel,
+        setGameLevel,
         activeNumber,
         setActiveNumber,
         gameState,
@@ -73,12 +80,13 @@ const stateSwitcher = (state) => { // FOR DEBUG
 const MemoryGame = () => {
 
     const {
+        gameLevel,
+        setGameLevel,
         activeNumber,
         setActiveNumber,
         gameState,
         setGameState
     } = useGameState();
-
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -88,10 +96,39 @@ const MemoryGame = () => {
         return () => clearTimeout(timeoutId);
     });
 
+    // The button board will replicate the sequence if gameState==='observe'
     return (
         <div className="memory-game">
-          <GameHeader />
-          <ButtonBoard activeNumber={activeNumber} />
+            <GameHeader />
+            <GameIntro gameState={gameState} />
+            <ButtonBoard
+                replicateSequence={[]}
+                gameState={gameState}
+                setGameState={setGameState}
+                activeNumber={activeNumber} 
+            />
+            <MessageDisplay gameState={gameState} />
+            <ShowLevel gameState={gameState} gameLevel={gameLevel} />
+            <br />
+            <br />
+            <StateDependentButton 
+                actualState={gameState}
+                dependsOn='start'
+                onClick={() => console.log("Start game")}
+                text='start'
+            />
+            <StateDependentButton 
+                actualState={gameState}
+                dependsOn='congrats'
+                onClick={() => console.log("Next sequence")}
+                text='next'
+            />
+            <StateDependentButton 
+                actualState={gameState}
+                dependsOn='end'
+                onClick={() => console.log("Try a new game")}
+                text='try again'
+            />
         </div>
     );
 };
