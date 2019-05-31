@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import GameHeader from './GameHeader';
+import ButtonBoard from './ButtonBoard';
+
 
 /* The game could be in any of the states below:
  * 'start' : The first state, where a button is shown to start the game
@@ -10,7 +13,8 @@ import React, { useState } from 'react';
 
 
 const useGameState = () => {
-    const {gameState, setGameState} = useState('start');
+    const [gameState, setGameState] = useState('start');
+    const [activeNumber, setActiveNumber] = useState(0);
 
     const updateBackgroundColor = (gameState) => {
         let color;
@@ -44,12 +48,14 @@ const useGameState = () => {
     updateBackgroundColor(gameState);
 
     return {
+        activeNumber,
+        setActiveNumber,
         gameState,
         setGameState: updateGameState
     };
 };
 
-const stateSwitcher = (state) => {
+const stateSwitcher = (state) => { // FOR DEBUG
     switch(state) {
         case 'start':
             return 'observe';
@@ -67,19 +73,25 @@ const stateSwitcher = (state) => {
 const MemoryGame = () => {
 
     const {
+        activeNumber,
+        setActiveNumber,
         gameState,
         setGameState
     } = useGameState();
 
-    setInterval(() => setGameState(stateSwitcher(gameState)),1000);
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setGameState(stateSwitcher(gameState));
+            setActiveNumber(1+Math.floor(Math.random()*9));
+        },2000);
+        return () => clearTimeout(timeoutId);
+    });
 
     return (
-        <div className="App">
-          <header className="App-header">
-            <h1>
-              Memory test
-            </h1>
-          </header>
+        <div className="memory-game">
+          <GameHeader />
+          <ButtonBoard activeNumber={activeNumber} />
         </div>
     );
 };
