@@ -1,3 +1,11 @@
+## Memory test
+
+**You can play it [here](https://miguelpc94.github.io/memory-test-app/)**
+
+This is my first React web app. Since I worked almost my entire life building software for embedded systems, I coded it like a state machine and React seems perfect for the job as it has a declarative aproach, without having to worry too much about the transition between states.
+
+PS.: I didn't manage to pass level 7 until now. Give it a try, you probably have a better memory than mine hahahah
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
