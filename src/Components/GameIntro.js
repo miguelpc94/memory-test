@@ -10,8 +10,8 @@ const GameIntro = (props) => {
             <p className={'game-intro'}>
                 A sequence of buttons will flash. 
                 You should memorize and repeat it right after.
-                The higher the level you reach, the longer is sequence.
-                The better your memory, the farther you can get.
+                The higher the level you reach, the longer is the sequence.
+                See how far you can get.
             </p>
         </>
         );

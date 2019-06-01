@@ -23,7 +23,7 @@ const ShowLevel = (props) => {
         case 'congrats':
             return (
                 <p>
-                    {`You've reached level ${props.gameLevel}`}
+                    {`You've passed level ${props.gameLevel}`}
                 </p>
             );
         default:

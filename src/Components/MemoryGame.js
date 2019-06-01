@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import GameHeader from './GameHeader';
 import GameIntro from './GameIntro';
 import ButtonBoard from './ButtonBoard';
@@ -18,8 +18,8 @@ import StateDependentButton from './StateDependentButton';
 
 const useGameState = () => {
     const [gameState, setGameState] = useState('start');
-    const [activeNumber, setActiveNumber] = useState(0);
-    const [gameLevel, setGameLevel] = useState(0);
+    const [gameLevel, setGameLevel] = useState(1);
+    const [buttonSequence, setButtonSequence] = useState([]);
 
     const updateBackgroundColor = (gameState) => {
         let color;
@@ -53,28 +53,13 @@ const useGameState = () => {
     updateBackgroundColor(gameState);
 
     return {
+        buttonSequence,
+        setButtonSequence,
         gameLevel,
         setGameLevel,
-        activeNumber,
-        setActiveNumber,
         gameState,
         setGameState: updateGameState
     };
-};
-
-const stateSwitcher = (state) => { // FOR DEBUG
-    switch(state) {
-        case 'start':
-            return 'observe';
-        case 'observe':
-            return 'replicate';
-        case 'replicate':
-            return 'congrats';
-        case 'congrats':
-            return 'end';
-        default:
-            return 'start';
-    }
 };
 
 const MemoryGame = () => {
@@ -82,19 +67,23 @@ const MemoryGame = () => {
     const {
         gameLevel,
         setGameLevel,
-        activeNumber,
-        setActiveNumber,
         gameState,
         setGameState
     } = useGameState();
 
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            setGameState(stateSwitcher(gameState));
-            setActiveNumber(1+Math.floor(Math.random()*9));
-        },2000);
-        return () => clearTimeout(timeoutId);
-    });
+    const onStartButtonPress = () => {
+        setGameState('observe');
+    }
+
+    const onTryAgainButtonPress = () => {
+        setGameLevel(1);
+        setGameState('observe');
+    }
+
+    const onNextButtonPress = () => {
+        setGameLevel(gameLevel+1);
+        setGameState('observe');
+    }
 
     // The button board will replicate the sequence if gameState==='observe'
     return (
@@ -102,10 +91,9 @@ const MemoryGame = () => {
             <GameHeader />
             <GameIntro gameState={gameState} />
             <ButtonBoard
-                replicateSequence={[]}
                 gameState={gameState}
                 setGameState={setGameState}
-                activeNumber={activeNumber} 
+                gameLevel={gameLevel}
             />
             <MessageDisplay gameState={gameState} />
             <ShowLevel gameState={gameState} gameLevel={gameLevel} />
@@ -114,19 +102,19 @@ const MemoryGame = () => {
             <StateDependentButton 
                 actualState={gameState}
                 dependsOn='start'
-                onClick={() => console.log("Start game")}
+                onClick={onStartButtonPress}
                 text='start'
             />
             <StateDependentButton 
                 actualState={gameState}
                 dependsOn='congrats'
-                onClick={() => console.log("Next sequence")}
+                onClick={onNextButtonPress}
                 text='next'
             />
             <StateDependentButton 
                 actualState={gameState}
                 dependsOn='end'
-                onClick={() => console.log("Try a new game")}
+                onClick={onTryAgainButtonPress}
                 text='try again'
             />
         </div>
