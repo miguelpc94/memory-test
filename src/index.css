@@ -6,7 +6,6 @@ body {
   color: #FFFFFF;
   text-align: center;
   display: inline-block;
-  font-family: "Courier";
 }
 
 .game-header {
@@ -41,6 +40,7 @@ body {
   margin-bottom: 5px;
   width: 55px;
   height: 55px;
+  cursor: pointer;
 }
 
 .game-message {
@@ -54,4 +54,5 @@ body {
 	display: inline-block;
   padding: 10px;
   background: #222222;
+  cursor: pointer;
 }
