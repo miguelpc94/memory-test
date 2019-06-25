@@ -1,5 +1,6 @@
-import React,{ useState, useEffect } from 'react';
+import React,{ useState, useEffect, useContext } from 'react';
 import GameButton from './GameButton';
+import {ConfigContext} from './MemoryGame';
 
 const buttonColors = [
     [0x7F,0xDB,0xFF],
@@ -13,7 +14,9 @@ const buttonColors = [
     [0xFF,0x41,0x36]
 ];
 
-const ButtonBoard = (props) => {
+const ButtonBoard = () => {
+
+    const context = useContext(ConfigContext);
 
     const [activeNumber, setActiveNumber] = useState(0);
     const [buttonSequence, setButtonSequence] = useState({sequenceAhead: [], next: -1});
@@ -24,82 +27,81 @@ const ButtonBoard = (props) => {
         return (1+Math.floor(Math.random()*9));
     }
 
-    const generateNumberSequence = (sequenceSize) => {
-        let numberSequence = [];
-        let lastNumber=null;
-        for (let index=0; index<sequenceSize; index++) {
-            let randomNumber=generateNumber();
-            while (randomNumber===lastNumber) randomNumber=generateNumber();
-            lastNumber=randomNumber;
-            numberSequence.push(randomNumber);
-        }
-        return numberSequence;
-    }
-
-    // This is the last function to finish the web app
-    const generateButtonSequence = () => {
-        let buttonSequence = generateNumberSequence(1+props.gameLevel);
-        let [next,...sequenceAhead] = [...buttonSequence];
-        sequenceAhead.push(0);
-        sequenceAhead.push(null);
-
-        setCorrectSequence(buttonSequence);
-        return {sequenceAhead, next};
-    };
-
-    const userIsWrong = () => {
-        if (userSequence.length===0) return false;
-        for (let index=0; index<userSequence.length; index++) {
-            if (userSequence[index]!==correctSequence[index]) return true;
-        }
-        return false;
-    };
-
-    const userIsDoneAndRight = () => {
-        if (!userIsWrong) return false;
-        if (userSequence.length===correctSequence.length) return true;
-    }
-
-    const sequenceNextButton = () => {
-        let sequenceAhead = buttonSequence.sequenceAhead;
-        let next = sequenceAhead.shift();
-        setActiveNumber(buttonSequence.next);
-        setButtonSequence({sequenceAhead, next});
-    }
-
-    // Determines what happens when the component is rendered
+    // Determines what happens when the component is rendered and when to re-render
     useEffect(() => {
-        if (props.gameState==='replicate' && userIsWrong()) {
-            props.setGameState('end');
+        const buttonBoardStateControl = (newState) => {
+            context.dispatchGameState({
+                type: 'buttonBoardControl',
+                data: newState
+            });
+        }
+        const generateNumberSequence = (sequenceSize) => {
+            let numberSequence = [];
+            let lastNumber=null;
+            for (let index=0; index<sequenceSize; index++) {
+                let randomNumber=generateNumber();
+                while (randomNumber===lastNumber) randomNumber=generateNumber();
+                lastNumber=randomNumber;
+                numberSequence.push(randomNumber);
+            }
+            return numberSequence;
+        };
+        const generateButtonSequence = () => {
+            let buttonSequence = generateNumberSequence(1+context.gameLevel);
+            let [next,...sequenceAhead] = [...buttonSequence];
+            sequenceAhead.push(0);
+            sequenceAhead.push(null);
+            setCorrectSequence(buttonSequence);
+            return {sequenceAhead, next};
+        }; 
+        const userIsWrong = () => {
+            if (userSequence.length===0) return false;
+            for (let index=0; index<userSequence.length; index++) {
+                if (userSequence[index]!==correctSequence[index]) return true;
+            }
+            return false;
+        };
+        const userIsDoneAndRight = () => {
+            if (!userIsWrong) return false;
+            if (userSequence.length===correctSequence.length) return true;
+        };
+        const sequenceNextButton = () => {
+            let sequenceAhead = buttonSequence.sequenceAhead;
+            let next = sequenceAhead.shift();
+            setActiveNumber(buttonSequence.next);
+            setButtonSequence({sequenceAhead, next});
+        };
+        if (context.gameState==='replicate' && userIsWrong()) {
+            buttonBoardStateControl('end');
             setButtonSequence({sequenceAhead: [], next: -1});
             return;
         }
-        if (props.gameState==='replicate' && userIsDoneAndRight()) {
-            props.setGameState('congrats');
+        if (context.gameState==='replicate' && userIsDoneAndRight()) {
+            buttonBoardStateControl('congrats');
             setButtonSequence({sequenceAhead: [], next: -1});
             return;
         }
-        if (props.gameState==='observe' && buttonSequence.next!==-1 && buttonSequence.next!==null) {
+        if (context.gameState==='observe' && buttonSequence.next!==-1 && buttonSequence.next!==null) {
             const timeoutId = setTimeout(() => sequenceNextButton(),1000);
             return () => clearTimeout(timeoutId);
         }
-        if (props.gameState==='observe' && buttonSequence.next===null) {
-            props.setGameState('replicate');
+        if (context.gameState==='observe' && buttonSequence.next===null) {
+            buttonBoardStateControl('replicate');
             setButtonSequence({sequenceAhead: [], next: -1});
             setActiveNumber(0);
             return;
         }
-        if (props.gameState==='observe' && buttonSequence.next===-1) {
+        if (context.gameState==='observe' && buttonSequence.next===-1) {
             setButtonSequence(generateButtonSequence());
             setUserSequence([]);
             setActiveNumber(0);
             return;
         }
-    });
+    }, [ buttonSequence, userSequence, correctSequence, context]);
 
     // Determines what happens when you click the buttons
     let buttonClick;
-    if (props.gameState==='replicate') {
+    if (context.gameState==='replicate') {
         buttonClick = (number) => {
             if (userSequence[userSequence.length-1]!==number) {
                 setActiveNumber(number);
@@ -125,8 +127,10 @@ const ButtonBoard = (props) => {
     }
 
     return (
-        <div className="button-board">
-            {buttons}
+        <div className='row'>
+            <div className="col-4 button-board center-block">
+                {buttons}
+            </div>
         </div>
     );
 }

@@ -2,9 +2,11 @@ import React from 'react';
 
 const GameHeader = () => {
     return (
-        <h1 className="game-header">
-              Memory test
-        </h1>
+        <div className='row'>
+            <div className='col-12'>
+                <div className='game-header'> Memory test </div>
+            </div>
+        </div>
     );
 }
 

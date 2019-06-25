@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useReducer, useContext } from 'react';
 import GameHeader from './GameHeader';
 import GameIntro from './GameIntro';
 import ButtonBoard from './ButtonBoard';
 import MessageDisplay from './MessageDisplay';
 import ShowLevel from './ShowLevel';
 import StateDependentButton from './StateDependentButton';
-
 
 /* The game could be in any of the states below:
  * 'start' : The first state, where a button is shown to start the game
@@ -15,11 +14,10 @@ import StateDependentButton from './StateDependentButton';
  * 'end' : The user got the sequence wrong. The game ends displaying the level the user reached
 **/
 
+export const ConfigContext = React.createContext();
 
 const useGameState = () => {
-    const [gameState, setGameState] = useState('start');
     const [gameLevel, setGameLevel] = useState(1);
-    const [buttonSequence, setButtonSequence] = useState([]);
 
     const updateBackgroundColor = (gameState) => {
         let color;
@@ -45,79 +43,116 @@ const useGameState = () => {
         document.body.style.backgroundColor = color;
     }
 
-    const updateGameState = (newGameState) => {
-        updateBackgroundColor(newGameState);
-        setGameState(newGameState);
+    const gameStateReducer = (state, action) => {
+        let newState;
+        switch (action.type) {
+            case 'buttonBoardControl':
+                newState = action.data;
+                break
+            case 'startButtonPress':
+                newState = 'observe';
+                break
+            case 'tryAgainButtonPress':
+                setGameLevel(1);
+                newState = 'observe';
+                break;
+            case 'nextButtonPress':
+                setGameLevel(action.data);
+                newState = 'observe';
+                break;
+            default: 
+                return state;
+        }
+        updateBackgroundColor(newState);
+        return newState;
     }
+
+    const [gameState, dispatchGameState] = useReducer(gameStateReducer, 'start');
 
     updateBackgroundColor(gameState);
 
     return {
-        buttonSequence,
-        setButtonSequence,
         gameLevel,
-        setGameLevel,
         gameState,
-        setGameState: updateGameState
+        dispatchGameState
     };
 };
 
+
 const MemoryGame = () => {
+
+    const configValue = useGameState();
 
     const {
         gameLevel,
-        setGameLevel,
         gameState,
-        setGameState
-    } = useGameState();
+        dispatchGameState
+    } = configValue;
 
     const onStartButtonPress = () => {
-        setGameState('observe');
+        dispatchGameState({
+            type: 'startButtonPress',
+            data: null
+        });
     }
 
     const onTryAgainButtonPress = () => {
-        setGameLevel(1);
-        setGameState('observe');
+        dispatchGameState({
+            type: 'tryAgainButtonPress',
+            data: null
+        });
     }
 
     const onNextButtonPress = () => {
-        setGameLevel(gameLevel+1);
-        setGameState('observe');
+        dispatchGameState({
+            type: 'nextButtonPress',
+            data: gameLevel+1
+        });
     }
 
     // The button board will replicate the sequence if gameState==='observe'
     return (
-        <div className="memory-game">
-            <GameHeader />
-            <GameIntro gameState={gameState} />
-            <ButtonBoard
-                gameState={gameState}
-                setGameState={setGameState}
-                gameLevel={gameLevel}
-            />
-            <MessageDisplay gameState={gameState} />
-            <ShowLevel gameState={gameState} gameLevel={gameLevel} />
-            <br />
-            <br />
-            <StateDependentButton 
-                actualState={gameState}
-                dependsOn='start'
-                onClick={onStartButtonPress}
-                text='start'
-            />
-            <StateDependentButton 
-                actualState={gameState}
-                dependsOn='congrats'
-                onClick={onNextButtonPress}
-                text='next'
-            />
-            <StateDependentButton 
-                actualState={gameState}
-                dependsOn='end'
-                onClick={onTryAgainButtonPress}
-                text='try again'
-            />
-        </div>
+        <ConfigContext.Provider value={configValue} >
+            <div className="container memory-game">
+                <GameHeader />
+                <GameIntro />
+                <ButtonBoard />
+                <br />
+                <div className="row">
+                    <div className="col-4 center-block" style={{"text-align": "center"}}>
+                        <MessageDisplay gameState={gameState} />
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-12 center-block" style={{"text-align": "center"}}>
+                        <ShowLevel gameState={gameState} gameLevel={gameLevel} />
+                    </div>
+                </div>
+                <br />
+                <div className="row">
+                    <div className="col-4 center-block" style={{"text-align": "center"}}>
+                        <StateDependentButton 
+                            actualState={gameState}
+                            dependsOn='start'
+                            onClick={onStartButtonPress}
+                            text='start'
+                        />
+                        <StateDependentButton 
+                            actualState={gameState}
+                            dependsOn='congrats'
+                            onClick={onNextButtonPress}
+                            text='next'
+                        />
+                        <StateDependentButton 
+                            actualState={gameState}
+                            dependsOn='end'
+                            onClick={onTryAgainButtonPress}
+                            text='try again'
+                        />
+                    </div>
+                </div>
+            </div>
+        </ConfigContext.Provider>
     );
 };
 
