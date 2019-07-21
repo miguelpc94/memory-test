@@ -1,5 +1,5 @@
 import React,{useContext} from 'react';
-import {ConfigContext} from './MemoryGame';
+import {ConfigContext} from './useGameState';
 
 const GameIntro = () => {
 

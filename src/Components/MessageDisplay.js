@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import {ConfigContext} from './useGameState';
 
-const MessageDisplay = (props) => {
+const MessageDisplay = () => {
 
-    switch(props.gameState) {
+    const context = useContext(ConfigContext);
+
+    switch(context.gameState) {
         case 'observe':
             return (
                 <p className='game-message'>

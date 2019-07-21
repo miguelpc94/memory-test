@@ -1,0 +1,36 @@
+body {
+	background-color: #ff851b;
+}
+
+.top-about-text {
+	color: white;
+	font-size: 20px;
+	text-align: left;
+}
+
+.photo {
+	width: 100%;
+	height: auto;
+	max-width: 250px;
+	min-width: 130px;
+}
+
+.logos {
+	margin-top: 5%;
+	margin-bottom: 5%;
+	width: 100%;
+	max-width: 60px;
+	min-width: 40px;
+}
+
+.go-back-button {
+	color: white;
+	font-weight: bold;
+	border-radius: 5px;
+	display: inline-block;
+	padding: 10px;
+	background: #222222;
+	cursor: pointer;
+	margin-left: 30%;
+	margin-right: 30%;
+}
